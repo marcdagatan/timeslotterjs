@@ -1,8 +1,10 @@
 import { createSchedule, IncrementUnit, SchedulerOptions, Interval } from './index';
 
 describe('TimeSlotterJS Scheduler', () => {
-  const baseDate = new Date(2024, 0, 1, 8); // January 1, 2024, 08:00 AM
+  // Base date for all tests - January 1, 2024, 08:00 AM
+  const baseDate = new Date(2024, 0, 1, 8);
 
+  // Helper function to create SchedulerOptions for tests
   const createTestOptions = (
     increment: number, 
     unit: IncrementUnit, 
@@ -20,24 +22,24 @@ describe('TimeSlotterJS Scheduler', () => {
 
   test('creates a schedule with hourly increments', () => {
     const schedule = createSchedule(createTestOptions(1, IncrementUnit.Hours, 4));
-    expect(schedule.length).toBe(4);
+    expect(schedule.length).toBe(4); // Expect 4 slots for 4 hours
   });
 
   test('creates a schedule with minute increments', () => {
     const schedule = createSchedule(createTestOptions(30, IncrementUnit.Minutes, 120));
-    expect(schedule.length).toBe(4);
+    expect(schedule.length).toBe(4); // Expect 4 slots for 2 hours with 30 minutes each
   });
 
   test('creates a schedule with second increments', () => {
     const schedule = createSchedule(createTestOptions(30, IncrementUnit.Seconds, 120));
-    expect(schedule.length).toBe(4);
+    expect(schedule.length).toBe(4); // Expect 4 slots for 120 seconds with 30 seconds each
   });
 
   test('marks times as booked based on single booking', () => {
     const bookings = [{ startTime: baseDate, endTime: new Date(baseDate.getTime() + 3600000) }];
     const schedule = createSchedule(createTestOptions(1, IncrementUnit.Hours, 2, bookings));
-    expect(schedule[0].isBooked).toBeTruthy();
-    expect(schedule[1].isBooked).toBeFalsy();
+    expect(schedule[0].isBooked).toBeTruthy(); // First slot should be booked
+    expect(schedule[1].isBooked).toBeFalsy();  // Second slot should be free
   });
 
   test('identifies overlapping appointments correctly', () => {
@@ -46,8 +48,8 @@ describe('TimeSlotterJS Scheduler', () => {
       { startTime: new Date(baseDate.getTime() + 3600000), endTime: new Date(baseDate.getTime() + 10800000) }
     ];
     const schedule = createSchedule(createTestOptions(1, IncrementUnit.Hours, 3, bookings));
-    expect(schedule[1].isBooked).toBeTruthy();
-    expect(schedule[2].isBooked).toBeTruthy();
+    expect(schedule[1].isBooked).toBeTruthy(); // Second slot overlaps and should be booked
+    expect(schedule[2].isBooked).toBeTruthy(); // Third slot overlaps and should be booked
   });
 
   test('respects maximum bookings per slot', () => {
@@ -56,7 +58,7 @@ describe('TimeSlotterJS Scheduler', () => {
       { startTime: new Date(baseDate.getTime() + 7200000), endTime: new Date(baseDate.getTime() + 10800000) } // Does not overlap with second slot
     ];
     const schedule = createSchedule(createTestOptions(1, IncrementUnit.Hours, 2, bookings, 1));
-    expect(schedule[0].isBooked).toBeTruthy();
-    expect(schedule[1].isBooked).toBeFalsy();
+    expect(schedule[0].isBooked).toBeTruthy(); // First slot should be booked
+    expect(schedule[1].isBooked).toBeFalsy();  // Second slot should be free
   });
 });
