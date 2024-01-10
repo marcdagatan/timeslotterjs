@@ -1,7 +1,7 @@
 export enum IncrementUnit {
   Hours = "hours",
   Minutes = "minutes",
-  Seconds = "seconds"
+  Seconds = "seconds",
 }
 
 export interface Interval {
@@ -42,16 +42,17 @@ export const addTime = (date: Date, increment: number, unit: IncrementUnit): Dat
 
 export const createSchedule = (options: SchedulerOptions): ScheduleItem[] => {
   const { start, end, increment, incrementUnit, bookings = [], maxBookings = 1 } = options;
-  let schedule: ScheduleItem[] = [];
+  const schedule: ScheduleItem[] = [];
   let currentTime = new Date(start);
 
   while (true) {
     const endTime = addTime(currentTime, increment, incrementUnit);
     if (endTime > end) break;
 
-    const isBooked = bookings.some(booking =>
-      booking.startTime < endTime && currentTime < booking.endTime
-    );
+    const overlappingBookings = bookings.filter(
+      booking => booking.startTime < endTime && currentTime < booking.endTime
+    ).length;
+    const isBooked = overlappingBookings >= maxBookings;
 
     schedule.push({ startTime: new Date(currentTime), endTime, isBooked });
 
